@@ -1,0 +1,11 @@
+# Backend
+backend/target/
+backend/data/
+
+# Frontend (내일 쓸 것)
+frontend/node_modules/
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/

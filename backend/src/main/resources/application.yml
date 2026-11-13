@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:h2:file:./data/monitor   # 메모리가 아니라 파일에 저장
+    username: sa
+    password:
+  sql:
+    init:
+      mode: always                     # 시작할 때 schema.sql 실행
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true # parent_id → parentId 자동 변환
+
+
+# file: 로 한 이유: 과제에 "전체를 메모리에 올려 매번 순회하는 방식은 지양" 이라서
