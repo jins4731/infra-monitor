@@ -42,7 +42,8 @@ public class MockDataGenerator implements CommandLineRunner {
             String nodePath = clusterPath + nodeId + "/";
             String nodeName = clusterName + "-node-" + n;
             add(nodeId, "NODE", nodeName, "HEALTHY", null, clusterId,
-            nodePath, new Timestamp(System.currentTimeMillis()), (int)(Math.random() * 100), (int)(Math.random() * 100), null);
+            nodePath,
+             new Timestamp(System.currentTimeMillis()), (int)(Math.random() * 100), (int)(Math.random() * 100), null);
             for (int ns=1; ns<=10; ns++) {
               long namespaceId = nextId++;
               String namespacePath = nodePath + namespaceId + "/";
