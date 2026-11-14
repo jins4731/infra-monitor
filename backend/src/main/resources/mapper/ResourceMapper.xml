@@ -2,46 +2,47 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.opensource.backend.resource.ResourceMapper">
-
-    <!-- 모든 조회에서 공통으로 쓰는 컬럼 목록 -->
-    <sql id="columns">
-      id, type, name, status, phase, parent_id, path,
-      updated_at, cpu, memory, restarts
-    </sql>
-
-    <!-- 최상위 Cluster 목록 -->
     <select id="findClusters" resultType="com.opensource.backend.resource.Resource">
-      SELECT <include refid="columns"/>
-        FROM resource
-       WHERE type = 'CLUSTER'
-       ORDER BY id
+      SELECT
+        id,
+        type,
+        name,
+        status,
+        phase,
+        parent_id,
+        path,
+        updated_at,
+        cpu,
+        memory,
+        restarts
+      FROM resource
+      WHERE type = 'CLUSTER'
+      ORDER BY id
     </select>
-
-    <!-- 펼치기: 하위 리소스 목록 (status가 있으면 필터) - idx_parent_status 사용 -->
     <select id="findChildren" resultType="com.opensource.backend.resource.Resource">
-      SELECT <include refid="columns"/>
+      SELECT id, type, name, status, phase, parent_id, path,
+            updated_at, cpu, memory, restarts
         FROM resource
-       WHERE parent_id = #{parentId}
+      WHERE parent_id = #{parentId}
       <if test="status != null and status != ''">
-         AND status = #{status}
+        AND status = #{status}
       </if>
-       ORDER BY id
+      ORDER BY id
     </select>
-
-    <!-- 상세 조회 - PK 사용 -->
+    <!-- 상세 -->
     <select id="findById" resultType="com.opensource.backend.resource.Resource">
-      SELECT <include refid="columns"/>
+      SELECT id, type, name, status, phase, parent_id, path,
+            updated_at, cpu, memory, restarts
         FROM resource
-       WHERE id = #{id}
+      WHERE id = #{id}
     </select>
-
-    <!-- 검색: 이름 앞부분 일치, 최대 50건 - idx_name 사용 -->
+    <!-- 검색: 앞부분 일치, 최대 50건 -->
     <select id="search" resultType="com.opensource.backend.resource.Resource">
-      SELECT <include refid="columns"/>
-        FROM resource
-       WHERE name LIKE CONCAT(#{q}, '%')
-       ORDER BY name
-       LIMIT 50
+      SELECT id, type, name, status, phase, parent_id, path,
+          updated_at, cpu, memory, restarts
+      FROM resource
+      WHERE name LIKE CONCAT(#{q}, '%')
+      ORDER BY name
+      LIMIT 50
     </select>
-
 </mapper>
