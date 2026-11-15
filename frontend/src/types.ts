@@ -18,3 +18,9 @@ export interface Resource {
 
 // 화면에 그릴 한 줄: 어떤 리소스를, 몇 단계 들여쓰기로 (트리 평탄화 결과)
 export type Row = { id: number; depth: number };
+
+// 폴링 응답: serverTime 은 다음 요청의 since 로 그대로 보낸다
+export interface Changes {
+  serverTime: string;
+  items: Resource[];
+}

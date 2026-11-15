@@ -42,6 +42,12 @@ const TreeRow = ({ node, depth, top, isExpanded, isSelected, onToggle, onSelect 
       <span className="dot" style={{ background: STATUS_COLOR[node.status] }} />
       <span className="type">{node.type}</span>
       {node.name}
+
+      {/* 오른쪽: 폴링으로 바뀌는 값 (Pod 는 상태, Node 는 CPU 사용률) */}
+      <span className="meta" key={node.updatedAt /* 값이 바뀌면 새로 그려져 강조 애니메이션이 다시 재생됨 */}>
+        {node.type === 'POD' && <span style={{ color: STATUS_COLOR[node.status] }}>{node.phase}</span>}
+        {node.type === 'NODE' && <span>CPU {node.cpu}%</span>}
+      </span>
     </div>
   );
 };

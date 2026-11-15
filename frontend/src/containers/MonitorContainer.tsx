@@ -1,4 +1,5 @@
 import useResourceTree from '../hooks/useResourceTree';
+import usePolling from '../hooks/usePolling';
 import TreeView from '../components/TreeView';
 import DetailPanel from '../components/DetailPanel';
 import StatusFilter from '../components/StatusFilter';
@@ -10,6 +11,7 @@ import SearchContainer from './SearchContainer';
  */
 const MonitorContainer = () => {
   const tree = useResourceTree();
+  const lastSync = usePolling(); // 변경분을 받아 옵저버로 알림 → useResourceTree 가 구독해서 반영
 
   return (
     <div className="app">
@@ -17,6 +19,9 @@ const MonitorContainer = () => {
         <h1>Infra Monitor</h1>
         <SearchContainer onPick={tree.reveal} />
         <StatusFilter value={tree.filterKey} onChange={tree.setFilter} />
+        <span className="sync muted">
+          3초마다 자동 갱신{lastSync && ` · 마지막 ${lastSync.toLocaleTimeString()}`}
+        </span>
       </header>
 
       <div className="main">

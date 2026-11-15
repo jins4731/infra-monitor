@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { fetchChildren, fetchClusters } from '../api';
 import { STATUS_FILTERS, type FilterKey } from '../filters';
+import { resourceChangeObserver } from '../observer';
 import type { Resource, Row } from '../types';
 import { ancestorIdsOf } from '../utils';
 
@@ -47,6 +48,28 @@ const useResourceTree = () => {
       setNodes(nodeMap);
       setRootIds(ids);
     });
+  }, []);
+
+  /**
+   * 폴링 변경분 구독 (옵저버 패턴)
+   * 이미 받아온 리소스 중 updatedAt 이 바뀐 것만 교체한다.
+   * - 바뀐 리소스만 새 객체가 되므로, React.memo 인 TreeRow 는 그 줄만 다시 그린다 (깜빡임 없음)
+   * - 아직 펼치지 않아 받아오지 않은 리소스는 무시한다 (펼칠 때 최신 값을 받으므로)
+   */
+  useEffect(() => {
+    const unsubscribe = resourceChangeObserver.subscribe((items) => {
+      setNodes((prev) => {
+        let next: Map<number, Resource> | null = null;
+        for (const item of items) {
+          const old = prev.get(item.id);
+          if (!old || old.updatedAt === item.updatedAt) continue;
+          if (!next) next = new Map(prev); // 바뀐 게 있을 때만 복사
+          next.set(item.id, item);
+        }
+        return next ?? prev; // 바뀐 게 없으면 그대로 → 리렌더링 없음
+      });
+    });
+    return unsubscribe; // 컴포넌트가 사라지면 구독 해제
   }, []);
 
   /** 받아온 자식들을 nodes 와 childrenOf 에 저장 (불변 컬렉션: 복사본을 만들어 교체) */

@@ -22,6 +22,11 @@ public interface ResourceMapper {
   // 시뮬레이터용
   long findMaxId();
 
+  List<Long> findIdsByType(@Param("type") String type);
+
+  void updateMetrics(@Param("id") long id, @Param("cpu") int cpu, @Param("memory") int memory,
+                     @Param("now") LocalDateTime now);
+
   void updatePodStatus(@Param("id") long id, @Param("status") String status, @Param("phase") String phase,
                        @Param("restarts") int restarts, @Param("cpu") int cpu, @Param("now") LocalDateTime now);
 }

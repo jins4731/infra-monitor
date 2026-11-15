@@ -58,6 +58,18 @@
     <select id="findMaxId" resultType="long">
       SELECT MAX(id) FROM resource
     </select>
+    <!-- 시뮬레이터: 특정 종류의 id 목록 (Node 200개) -->
+    <select id="findIdsByType" resultType="long">
+      SELECT id FROM resource WHERE type = #{type}
+    </select>
+    <!-- 시뮬레이터: Node 사용률 변경 -->
+    <update id="updateMetrics">
+      UPDATE resource
+         SET cpu = #{cpu},
+             memory = #{memory},
+             updated_at = #{now}
+       WHERE id = #{id}
+    </update>
     <!-- 시뮬레이터: Pod 상태 변경. type = 'POD' 조건으로 Pod 가 아닌 id 는 무시된다 -->
     <update id="updatePodStatus">
       UPDATE resource

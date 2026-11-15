@@ -12,3 +12,6 @@ export const STATUS_COLOR: Record<Status, string> = {
 
 /** 검색 입력이 멈추고 이 시간 뒤에 요청 */
 export const SEARCH_DEBOUNCE_MS = 300;
+
+/** 변경분 폴링 주기 */
+export const POLLING_INTERVAL_MS = 3000;
