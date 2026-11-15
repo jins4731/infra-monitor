@@ -137,18 +137,12 @@
 .row:hover { background: #f1f3f5; }
 .row.selected { background: #e8f0fe; }
 
-/* 줄 오른쪽 값. 폴링으로 값이 바뀌면 잠깐 노란색으로 강조 */
+/* 줄 오른쪽 값. 폴링으로 값이 바뀌면 TreeRow 에서 잠깐 노란색으로 강조 */
 .meta {
   margin-left: auto;
   padding: 0 12px;
   font-size: 12px;
   color: #6b7280;
-  animation: flash 1s ease-out;
-}
-
-@keyframes flash {
-  from { background: #fef3c7; }
-  to { background: transparent; }
 }
 
 .toggle {

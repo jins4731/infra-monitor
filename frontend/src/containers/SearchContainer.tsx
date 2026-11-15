@@ -14,10 +14,14 @@ type Props = {
  */
 const SearchContainer = ({ onPick }: Props) => {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<Resource[]>([]);
+  // 결과와 함께 "어떤 검색어의 결과인지"를 저장한다
+  const [searched, setSearched] = useState<{ term: string; items: Resource[] } | null>(null);
   const [open, setOpen] = useState(false);
 
   const term = query.trim();
+  // 지금 입력한 검색어의 결과가 아직 없으면 검색 중 (디바운스 대기 + 응답 대기)
+  // → 다른 검색어의 예전 결과나 "결과 없음"을 잘못 보여주지 않는다
+  const loading = searched?.term !== term;
 
   useEffect(() => {
     if (!term) return;
@@ -26,7 +30,7 @@ const SearchContainer = ({ onPick }: Props) => {
     const controller = new AbortController();
     const timer = setTimeout(() => {
       searchResources(term, controller.signal)
-        .then(setResults)
+        .then((items) => setSearched({ term, items }))
         .catch(() => {}); // 취소된 요청은 무시
     }, SEARCH_DEBOUNCE_MS);
 
@@ -49,7 +53,8 @@ const SearchContainer = ({ onPick }: Props) => {
   return (
     <SearchBox
       query={query}
-      results={results}
+      results={loading ? [] : searched.items}
+      loading={loading}
       open={open && term !== ''} // 검색어가 있을 때만 결과 목록 표시
       onQueryChange={handleQueryChange}
       onOpen={() => setOpen(true)}

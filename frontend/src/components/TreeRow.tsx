@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { ROW_HEIGHT, STATUS_COLOR } from '../constants';
 import type { Resource } from '../types';
 
@@ -18,6 +18,19 @@ type Props = {
  * 그래서 onToggle/onSelect 는 훅에서 useCallback 으로 참조를 고정해 내려준다.
  */
 const TreeRow = ({ node, depth, top, isExpanded, isSelected, onToggle, onSelect }: Props) => {
+  /**
+   * 폴링으로 값이 바뀌었을 때만 오른쪽 값을 잠깐 강조한다.
+   * 처음 그려질 때(펼치기, 스크롤로 새로 보일 때)는 강조하지 않도록, 마지막으로 본 updatedAt 과 비교한다.
+   * 화면 상태가 아니라 DOM 효과라서 state 대신 Web Animations API 로 직접 실행한다.
+   */
+  const metaRef = useRef<HTMLSpanElement>(null);
+  const lastUpdatedAt = useRef(node.updatedAt);
+  useEffect(() => {
+    if (lastUpdatedAt.current === node.updatedAt) return;
+    lastUpdatedAt.current = node.updatedAt;
+    metaRef.current?.animate([{ background: '#fef3c7' }, { background: 'transparent' }], { duration: 1000 });
+  }, [node.updatedAt]);
+
   return (
     <div
       className={`row ${isSelected ? 'selected' : ''}`}
@@ -44,7 +57,7 @@ const TreeRow = ({ node, depth, top, isExpanded, isSelected, onToggle, onSelect 
       {node.name}
 
       {/* 오른쪽: 폴링으로 바뀌는 값 (Pod 는 상태, Node 는 CPU 사용률) */}
-      <span className="meta" key={node.updatedAt /* 값이 바뀌면 새로 그려져 강조 애니메이션이 다시 재생됨 */}>
+      <span className="meta" ref={metaRef}>
         {node.type === 'POD' && <span style={{ color: STATUS_COLOR[node.status] }}>{node.phase}</span>}
         {node.type === 'NODE' && <span>CPU {node.cpu}%</span>}
       </span>

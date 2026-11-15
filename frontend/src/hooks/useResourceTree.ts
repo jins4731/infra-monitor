@@ -176,16 +176,23 @@ const useResourceTree = () => {
   const collapseAll = useCallback(() => setExpanded(new Set()), []);
 
   /**
+   * 필터에 쓸 데이터. "전체"일 때는 줄 목록이 리소스 값과 상관없으므로 null 로 둔다.
+   * → 폴링으로 nodes 가 바뀌어도 아래 평탄화(10만 줄)를 다시 계산하지 않는다.
+   *   (바뀐 줄은 TreeRow 가 새 node 를 받아 그 줄만 다시 그린다)
+   */
+  const nodesForFilter = filterKey === 'ALL' ? null : nodes;
+
+  /**
    * 트리 평탄화: 펼쳐진 것만 따라 내려가며 "지금 보여야 하는 줄"을 순서대로 담는다.
    * - 상태 필터는 Pod 에만 적용한다. (상위 리소스는 하위 상태를 모아 두지 않아서 항상 표시)
-   * - useMemo: 펼침 상태, 자식 목록, 데이터, 필터가 바뀔 때만 다시 계산한다 (선택만 바뀌면 재계산 안 함)
+   * - useMemo: 펼침 상태, 자식 목록, 필터(필터가 걸렸을 때는 데이터)가 바뀔 때만 다시 계산한다
    */
   const rows = useMemo(() => {
     const strategy = STATUS_FILTERS[filterKey];
     const result: Row[] = [];
     const walk = (ids: number[], depth: number) => {
       for (const id of ids) {
-        const node = nodes.get(id);
+        const node = nodesForFilter?.get(id);
         if (node?.type === 'POD' && !strategy.match(node)) continue; // 필터에 맞지 않는 Pod 는 건너뜀
         result.push({ id, depth });
 
@@ -197,7 +204,7 @@ const useResourceTree = () => {
     };
     walk(rootIds, 0); // 맨 위 Cluster 부터 시작
     return result;
-  }, [rootIds, childrenOf, expanded, nodes, filterKey]);
+  }, [rootIds, childrenOf, expanded, nodesForFilter, filterKey]);
 
   // 상세에 보여줄 리소스와 경로 (상위 id 를 이름으로 바꾼다)
   const selected = selectedId !== null ? nodes.get(selectedId) : undefined;
