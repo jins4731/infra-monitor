@@ -15,3 +15,6 @@ export interface Resource {
   cpu: number | null; // CPU 사용률(%). Node, Pod만 있고 Cluster·Namespace는 null
   memory: number | null; // 메모리 사용률(%). Node, Pod만 있음
 }
+
+// 화면에 그릴 한 줄: 어떤 리소스를, 몇 단계 들여쓰기로 (트리 평탄화 결과)
+export type Row = { id: number; depth: number };
