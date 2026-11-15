@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { ROW_HEIGHT, STATUS_COLOR } from '../constants';
 import type { Resource } from '../types';
 
@@ -11,7 +12,11 @@ type Props = {
   onSelect: (id: number) => void;
 };
 
-/** Presentational: 트리 한 줄 */
+/**
+ * Presentational: 트리 한 줄
+ * React.memo: props 가 그대로면 다시 그리지 않는다 (얕은 비교).
+ * 그래서 onToggle/onSelect 는 훅에서 useCallback 으로 참조를 고정해 내려준다.
+ */
 const TreeRow = ({ node, depth, top, isExpanded, isSelected, onToggle, onSelect }: Props) => {
   return (
     <div
@@ -41,4 +46,4 @@ const TreeRow = ({ node, depth, top, isExpanded, isSelected, onToggle, onSelect 
   );
 };
 
-export default TreeRow;
+export default memo(TreeRow);
