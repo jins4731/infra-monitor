@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './App.css'
 import { fetchChildren, fetchClusters } from './api';
 import type { Resource } from './types';
+import { useVirtualizer } from '@tanstack/react-virtual';
 
 function App() {
   const [nodes, setNodes] = useState<Map<number, Resource>>(new Map());
@@ -71,19 +72,45 @@ function App() {
 
   walk(rootIds, 0);   // 맨 위 Cluster부터 시작
 
+  const ROW_HEIGHT = 30;                                // 한 줄 높이(px)
+  const scrollRef = useRef<HTMLDivElement>(null);       // 스크롤 박스를 가리킬 참조
+
+  const virtualizer = useVirtualizer({
+    count: rows.length,                          // 전체 줄 수
+    getScrollElement: () => scrollRef.current,   // 어떤 박스가 스크롤되는지
+    estimateSize: () => ROW_HEIGHT,              // 한 줄 높이
+    overscan: 10,                                // 화면 위아래로 10줄 여유
+  });
+
   return (
     <div className="App">
       <h1>Infra Monitor</h1>
       {
-        rows.map((row) => {
-          const node = nodes.get(row.id);
-          return (
-            <div key={row.id} style={{ marginLeft: `${row.depth * 20}px` }}>
-              <button onClick={() => toggle(row.id)}>{expanded.has(row.id) ? '▾' : '▸'}</button>
-              {node?.name}
-            </div>
-          );
-        })
+        <div ref={scrollRef} style={{ height: 600, overflow: 'auto', border: '1px solid #ddd' }}>
+          {/* 전체 높이만큼 빈 공간 → 스크롤바가 전체 줄 수만큼 생김 */}
+          <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
+            {virtualizer.getVirtualItems().map((item) => {
+              const row = rows[item.index];
+              const node = nodes.get(row.id);
+              return (
+                <div
+                  key={row.id}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    width: '100%',
+                    height: ROW_HEIGHT,
+                    transform: `translateY(${item.start}px)`,   // 이 줄이 있어야 할 위치로 이동
+                    paddingLeft: row.depth * 20,
+                  }}
+                >
+                  <button onClick={() => toggle(row.id)}>{expanded.has(row.id) ? '▾' : '▸'}</button>
+                  {node?.name}
+                </div>
+              );
+            })}
+          </div>
+        </div>
       }
     </div>
   )  
