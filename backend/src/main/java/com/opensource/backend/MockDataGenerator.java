@@ -26,11 +26,9 @@ public class MockDataGenerator implements CommandLineRunner {
         Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM resource", Integer.class);
         if (count != null && count > 0) return;   // 이미 있으면 건너뜀
 
-        // TODO: 4중 for문으로 Cluster → Node → Namespace → Pod 생성
-        //  - id는 nextId++ 로
-        //  - path는 부모 path + id + "/"   (예: "/1/" → "/1/2/")
-        //  - 한 줄 만들 때마다 add(...) 호출
-
+        // Cluster 20 → Node 10 → Namespace 10 → Pod 50 = 102,220건
+        // - id 는 생성 순서대로 1씩 증가 (부모가 항상 자식보다 작은 id)
+        // - path 는 부모 path + 자기 id + "/"  (예: "/1/" → "/1/2/")
         for (int c=1; c<=20; c++) {
           long clusterId = nextId++;
           String clusterPath = "/" + clusterId + "/";
@@ -54,7 +52,7 @@ public class MockDataGenerator implements CommandLineRunner {
                 long podId = nextId++;
                 String podPath = namespacePath + podId + "/";
                 String podName = nodeName + "-" + namespaceName + "-pod-" + p;
-                 // ★ 상태 정하기
+                // 상태: 90% 정상, 7% 경고, 3% 오류
                 double r = Math.random();
                 String status, phase;
                 int restarts;
@@ -72,7 +70,7 @@ public class MockDataGenerator implements CommandLineRunner {
                     restarts = 0;
                 }
 
-                add(podId, "POD", podName, status, phase, namespaceId,           // ★ 변수 사용
+                add(podId, "POD", podName, status, phase, namespaceId,
                     podPath, new Timestamp(System.currentTimeMillis()),
                     (int) (Math.random() * 100), (int) (Math.random() * 100), restarts);
               }

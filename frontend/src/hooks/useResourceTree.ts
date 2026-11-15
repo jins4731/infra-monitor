@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { fetchChildren, fetchClusters } from '../api';
+import { fetchChildren, fetchClusters, fetchDescendants } from '../api';
 import { STATUS_FILTERS, type FilterKey } from '../filters';
 import { resourceChangeObserver } from '../observer';
 import type { Resource, Row } from '../types';
@@ -133,6 +133,48 @@ const useResourceTree = () => {
 
   const clearScrollTarget = useCallback(() => setScrollTargetId(null), []);
 
+  // 전체 펼치기 진행 중 (버튼 비활성화용)
+  const [expandingAll, setExpandingAll] = useState(false);
+
+  /**
+   * 전체 펼치기: Cluster 마다 하위 전체를 요청 1번으로 받는다 (Materialized Path, 총 20번).
+   * 10만 건을 한 번에 저장하므로 saveChildren 을 2,000번 부르지 않고 Map 을 한 번만 복사한다.
+   */
+  const expandAll = useCallback(async () => {
+    setExpandingAll(true);
+    try {
+      const lists = await Promise.all(rootIds.map((id) => fetchDescendants(id)));
+      const all = lists.flat();
+
+      // 부모 id → 자식 id 목록 (id 순서로 왔으므로 원래 순서가 유지된다)
+      const grouped = new Map<number, number[]>();
+      for (const r of all) {
+        if (r.parentId === null) continue;
+        const siblings = grouped.get(r.parentId) ?? [];
+        siblings.push(r.id);
+        grouped.set(r.parentId, siblings);
+      }
+
+      setNodes((prev) => {
+        const next = new Map(prev);
+        all.forEach((r) => next.set(r.id, r));
+        return next;
+      });
+      setChildrenOf((prev) => {
+        const next = new Map(prev);
+        grouped.forEach((ids, parentId) => next.set(parentId, ids));
+        return next;
+      });
+      grouped.forEach((_, parentId) => requestedRef.current.add(parentId));
+      setExpanded(new Set(grouped.keys())); // 자식이 있는 리소스를 모두 펼침
+    } finally {
+      setExpandingAll(false);
+    }
+  }, [rootIds]);
+
+  /** 전체 접기 (받아온 데이터는 캐시로 남겨 둔다) */
+  const collapseAll = useCallback(() => setExpanded(new Set()), []);
+
   /**
    * 트리 평탄화: 펼쳐진 것만 따라 내려가며 "지금 보여야 하는 줄"을 순서대로 담는다.
    * - 상태 필터는 Pod 에만 적용한다. (상위 리소스는 하위 상태를 모아 두지 않아서 항상 표시)
@@ -175,6 +217,9 @@ const useResourceTree = () => {
     setFilter: setFilterKey,
     toggle,
     reveal,
+    expandAll,
+    collapseAll,
+    expandingAll,
     select: setSelectedId,
     clearScrollTarget,
   };

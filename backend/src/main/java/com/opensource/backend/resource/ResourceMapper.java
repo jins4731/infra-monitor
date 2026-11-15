@@ -16,6 +16,9 @@ public interface ResourceMapper {
 
   List<Resource> search(String q);
 
+  // 하위 전체 (path 앞부분 일치)
+  List<Resource> findDescendants(@Param("path") String path);
+
   // 폴링: since 이후 바뀐 리소스
   List<Resource> findChangedSince(@Param("since") LocalDateTime since);
 

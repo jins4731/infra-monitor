@@ -19,6 +19,13 @@ const MonitorContainer = () => {
         <h1>Infra Monitor</h1>
         <SearchContainer onPick={tree.reveal} />
         <StatusFilter value={tree.filterKey} onChange={tree.setFilter} />
+        <div className="tree-actions">
+          <button onClick={tree.expandAll} disabled={tree.expandingAll}>
+            {tree.expandingAll ? '불러오는 중…' : '전체 펼치기'}
+          </button>
+          <button onClick={tree.collapseAll}>전체 접기</button>
+          <span className="muted">표시 중 {tree.rows.length.toLocaleString()}줄</span>
+        </div>
         <span className="sync muted">
           3초마다 자동 갱신{lastSync && ` · 마지막 ${lastSync.toLocaleTimeString()}`}
         </span>

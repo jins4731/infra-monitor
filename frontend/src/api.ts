@@ -10,6 +10,16 @@ export async function fetchChildren(id: number): Promise<Resource[]> {
   return response.json();
 }
 
+/**
+ * 하위 전체 (전체 펼치기용)
+ * @param {number} id 기준 리소스 (보통 Cluster)
+ * @return {Promise<Resource[]>} 모든 자손. id 순서라 부모가 자식보다 먼저 나온다
+ */
+export async function fetchDescendants(id: number): Promise<Resource[]> {
+  const response = await fetch(`/api/resources/${id}/descendants`);
+  return response.json();
+}
+
 // 이름 앞부분 일치 검색 (최대 50건). signal: 입력이 바뀌면 이전 요청을 취소하기 위함
 export async function searchResources(q: string, signal?: AbortSignal): Promise<Resource[]> {
   const response = await fetch(`/api/search?q=${encodeURIComponent(q)}`, { signal });

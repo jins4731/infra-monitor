@@ -29,6 +29,13 @@ public class ResourceService {
     return resourceMapper.search(q);
   }
 
+  /** 하위 전체: 대상의 path 로 시작하는 리소스를 한 번에 조회. 없는 id 면 null */
+  public List<Resource> findDescendants(Long id) {
+    Resource resource = resourceMapper.findById(id);
+    if (resource == null) return null;
+    return resourceMapper.findDescendants(resource.getPath());
+  }
+
   /**
    * 폴링: since 이후 바뀐 리소스와, 다음 요청에 쓸 기준 시간을 함께 돌려준다.
    * 첫 요청(since 없음)은 기준 시간만 받아간다.

@@ -33,6 +33,13 @@ public class ResourceController {
     return resourceService.findChildren(id, status);
   }
 
+  // 전체 펼치기: 하위 전체 (Cluster 하나면 Node 10 + Namespace 100 + Pod 5,000)
+  @GetMapping("/resources/{id}/descendants")
+  public ResponseEntity<List<Resource>> getDescendants(@PathVariable Long id) {
+    List<Resource> descendants = resourceService.findDescendants(id);
+    return descendants == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(descendants);
+  }
+
   // 상세 조회 (없는 id면 404)
   @GetMapping("/resources/{id}")
   public ResponseEntity<Resource> getResource(@PathVariable Long id) {
