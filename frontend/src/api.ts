@@ -4,3 +4,8 @@ export async function fetchClusters(): Promise<Resource[]> {
   const response = await fetch('/api/clusters');
   return response.json(); 
 }
+
+export async function fetchChildren(id: number): Promise<Resource[]> {
+  const response = await fetch(`/api/resources/${id}/children`);
+  return response.json(); 
+}
