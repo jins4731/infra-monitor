@@ -4,6 +4,11 @@ import { fetchChildren, fetchClusters } from './api';
 import type { Resource } from './types';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
+// 화면에 그릴 한 줄: 어떤 리소스를, 몇 단계 들여쓰기로
+type Row = { id: number; depth: number };
+
+const ROW_HEIGHT = 30; // 한 줄 높이(px)
+
 function App() {
   const [nodes, setNodes] = useState<Map<number, Resource>>(new Map());
   const [rootIds, setRootIds] = useState<number[]>([]);
@@ -52,11 +57,6 @@ function App() {
     }
   }
 
-  console.log(childrenOf);
-
-  // 화면에 그릴 한 줄: 어떤 리소스를, 몇 단계 들여쓰기로
-  type Row = { id: number; depth: number };
-
   const rows: Row[] = [];
 
   function walk(ids: number[], depth: number) {
@@ -72,7 +72,6 @@ function App() {
 
   walk(rootIds, 0);   // 맨 위 Cluster부터 시작
 
-  const ROW_HEIGHT = 30;                                // 한 줄 높이(px)
   const scrollRef = useRef<HTMLDivElement>(null);       // 스크롤 박스를 가리킬 참조
 
   const virtualizer = useVirtualizer({
@@ -85,33 +84,34 @@ function App() {
   return (
     <div className="App">
       <h1>Infra Monitor</h1>
-      {
-        <div ref={scrollRef} style={{ height: 600, overflow: 'auto', border: '1px solid #ddd' }}>
-          {/* 전체 높이만큼 빈 공간 → 스크롤바가 전체 줄 수만큼 생김 */}
-          <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
-            {virtualizer.getVirtualItems().map((item) => {
-              const row = rows[item.index];
-              const node = nodes.get(row.id);
-              return (
-                <div
-                  key={row.id}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    width: '100%',
-                    height: ROW_HEIGHT,
-                    transform: `translateY(${item.start}px)`,   // 이 줄이 있어야 할 위치로 이동
-                    paddingLeft: row.depth * 20,
-                  }}
-                >
+      <div ref={scrollRef} style={{ height: 600, overflow: 'auto', border: '1px solid #ddd' }}>
+        {/* 전체 높이만큼 빈 공간 → 스크롤바가 전체 줄 수만큼 생김 */}
+        <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
+          {virtualizer.getVirtualItems().map((item) => {
+            const row = rows[item.index];
+            const node = nodes.get(row.id);
+            return (
+              <div
+                key={row.id}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  width: '100%',
+                  height: ROW_HEIGHT,
+                  transform: `translateY(${item.start}px)`,   // 이 줄이 있어야 할 위치로 이동
+                  paddingLeft: row.depth * 20,
+                }}
+              >
+                {/* Pod는 자식이 없으므로 펼치기 버튼을 숨긴다 */}
+                {node?.type !== 'POD' && (
                   <button onClick={() => toggle(row.id)}>{expanded.has(row.id) ? '▾' : '▸'}</button>
-                  {node?.name}
-                </div>
-              );
-            })}
-          </div>
+                )}
+                {node?.name}
+              </div>
+            );
+          })}
         </div>
-      }
+      </div>
     </div>
   )  
 }
