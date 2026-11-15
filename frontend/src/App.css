@@ -118,6 +118,8 @@
 .tree {
   flex: 1;
   overflow: auto;
+  /* 스크롤 박스 안의 변화(줄 추가/제거)가 바깥 레이아웃·그리기에 영향을 주지 않도록 범위를 가둔다 */
+  contain: strict;
   background: #fff;
   border: 1px solid #e3e5e8;
   border-radius: 6px;
@@ -128,6 +130,7 @@
   top: 0;
   left: 0;
   width: 100%;
+  contain: layout style; /* 줄 하나의 변화가 다른 줄의 레이아웃 계산을 일으키지 않도록 */
   display: flex;
   align-items: center;
   gap: 6px;

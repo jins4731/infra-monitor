@@ -26,7 +26,9 @@ const TreeView = ({ rows, nodes, expanded, selectedId, scrollTargetId, onToggle,
     count: rows.length, // 전체 줄 수
     getScrollElement: () => scrollRef.current, // 어떤 박스가 스크롤되는지
     estimateSize: () => ROW_HEIGHT, // 한 줄 높이
-    overscan: 10, // 화면 위아래로 10줄 여유
+    overscan: 5, // 화면 위아래로 5줄 여유 (많을수록 빠른 스크롤에 빈칸이 덜 보이지만 프레임마다 그릴 양이 늘어남)
+    // 스크롤 이벤트마다 flushSync 로 즉시 렌더링하지 않고 React 가 모아서 그리게 한다 (스크롤 FPS 개선)
+    useFlushSync: false,
   });
 
   // 스크롤 대상이 rows 에 나타나면 그 줄로 이동 (아직 펼쳐지는 중이면 다음 렌더링에서 다시 확인)
