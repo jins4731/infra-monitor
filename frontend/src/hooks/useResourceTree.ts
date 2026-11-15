@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { fetchChildren, fetchClusters } from '../api';
+import { STATUS_FILTERS, type FilterKey } from '../filters';
 import type { Resource, Row } from '../types';
 import { ancestorIdsOf } from '../utils';
 
@@ -24,6 +25,8 @@ const useResourceTree = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   // 검색으로 고른 리소스: 트리에 나타나면 그 줄로 스크롤
   const [scrollTargetId, setScrollTargetId] = useState<number | null>(null);
+  // 상태 필터 (전략 키)
+  const [filterKey, setFilterKey] = useState<FilterKey>('ALL');
 
   /**
    * 자식을 요청한 적 있는 부모 id.
@@ -97,6 +100,10 @@ const useResourceTree = () => {
       ancestorIds.forEach((id) => next.add(id));
       return next;
     });
+    // 고른 Pod 가 현재 필터에 맞지 않으면 트리에서 숨겨져 찾아갈 수 없으므로 필터를 해제한다
+    setFilterKey((prev) =>
+      target.type === 'POD' && !STATUS_FILTERS[prev].match(target) ? 'ALL' : prev,
+    );
     setSelectedId(target.id);
     setScrollTargetId(target.id);
   }, [saveChildren]);
@@ -105,12 +112,16 @@ const useResourceTree = () => {
 
   /**
    * 트리 평탄화: 펼쳐진 것만 따라 내려가며 "지금 보여야 하는 줄"을 순서대로 담는다.
-   * useMemo: 펼침 상태나 자식 목록이 바뀔 때만 다시 계산한다 (선택만 바뀌었을 때는 재계산 안 함)
+   * - 상태 필터는 Pod 에만 적용한다. (상위 리소스는 하위 상태를 모아 두지 않아서 항상 표시)
+   * - useMemo: 펼침 상태, 자식 목록, 데이터, 필터가 바뀔 때만 다시 계산한다 (선택만 바뀌면 재계산 안 함)
    */
   const rows = useMemo(() => {
+    const strategy = STATUS_FILTERS[filterKey];
     const result: Row[] = [];
     const walk = (ids: number[], depth: number) => {
       for (const id of ids) {
+        const node = nodes.get(id);
+        if (node?.type === 'POD' && !strategy.match(node)) continue; // 필터에 맞지 않는 Pod 는 건너뜀
         result.push({ id, depth });
 
         const kids = childrenOf.get(id);
@@ -121,7 +132,7 @@ const useResourceTree = () => {
     };
     walk(rootIds, 0); // 맨 위 Cluster 부터 시작
     return result;
-  }, [rootIds, childrenOf, expanded]);
+  }, [rootIds, childrenOf, expanded, nodes, filterKey]);
 
   // 상세에 보여줄 리소스와 경로 (상위 id 를 이름으로 바꾼다)
   const selected = selectedId !== null ? nodes.get(selectedId) : undefined;
@@ -137,6 +148,8 @@ const useResourceTree = () => {
     selected,
     breadcrumb,
     scrollTargetId,
+    filterKey,
+    setFilter: setFilterKey,
     toggle,
     reveal,
     select: setSelectedId,

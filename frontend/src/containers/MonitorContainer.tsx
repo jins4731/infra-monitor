@@ -1,6 +1,7 @@
 import useResourceTree from '../hooks/useResourceTree';
 import TreeView from '../components/TreeView';
 import DetailPanel from '../components/DetailPanel';
+import StatusFilter from '../components/StatusFilter';
 import SearchContainer from './SearchContainer';
 
 /**
@@ -15,6 +16,7 @@ const MonitorContainer = () => {
       <header className="header">
         <h1>Infra Monitor</h1>
         <SearchContainer onPick={tree.reveal} />
+        <StatusFilter value={tree.filterKey} onChange={tree.setFilter} />
       </header>
 
       <div className="main">
