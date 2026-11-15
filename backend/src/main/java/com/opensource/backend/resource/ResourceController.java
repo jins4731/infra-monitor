@@ -1,7 +1,9 @@
 package com.opensource.backend.resource;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,5 +44,12 @@ public class ResourceController {
   @GetMapping("/search")
   public List<Resource> search(@RequestParam String q) {
     return resourceService.search(q);
+  }
+
+  // 폴링: since 이후 바뀐 리소스 (예: /api/changes?since=2026-11-15T14:00:00)
+  @GetMapping("/changes")
+  public ResourceService.Changes getChanges(
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime since) {
+    return resourceService.findChanges(since);
   }
 }

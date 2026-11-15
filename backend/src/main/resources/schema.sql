@@ -14,3 +14,5 @@ CREATE TABLE IF NOT EXISTS resource (
 CREATE INDEX IF NOT EXISTS idx_parent_status ON resource(parent_id, status);
 CREATE INDEX IF NOT EXISTS idx_status ON resource(status);
 CREATE INDEX IF NOT EXISTS idx_name ON resource(name);
+-- 폴링: WHERE updated_at > ? (최근 바뀐 것만 범위 조회)
+CREATE INDEX IF NOT EXISTS idx_updated_at ON resource(updated_at);

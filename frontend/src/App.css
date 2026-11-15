@@ -7,10 +7,56 @@
   gap: 12px;
 }
 
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .app h1 {
   margin: 0;
   font-size: 18px;
+  white-space: nowrap;
 }
+
+/* 검색 */
+.search {
+  position: relative;
+  width: 420px;
+}
+
+.search input {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid #e3e5e8;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.search-results {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 400px;
+  overflow: auto;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  background: #fff;
+  border: 1px solid #e3e5e8;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.search-results li {
+  display: flex;
+  gap: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.search-results li:hover { background: #f1f3f5; }
 
 .main {
   flex: 1;

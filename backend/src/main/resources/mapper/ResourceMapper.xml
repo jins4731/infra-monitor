@@ -45,4 +45,28 @@
       ORDER BY name
       LIMIT 50
     </select>
+    <!-- 폴링: since 이후에 바뀐 리소스 (idx_updated_at 사용) -->
+    <select id="findChangedSince" resultType="com.opensource.backend.resource.Resource">
+      SELECT id, type, name, status, phase, parent_id, path,
+          updated_at, cpu, memory, restarts
+      FROM resource
+      WHERE updated_at &gt; #{since}
+      ORDER BY updated_at
+      LIMIT 1000
+    </select>
+    <!-- 시뮬레이터: 가장 큰 id (무작위 id 를 뽑을 범위) -->
+    <select id="findMaxId" resultType="long">
+      SELECT MAX(id) FROM resource
+    </select>
+    <!-- 시뮬레이터: Pod 상태 변경. type = 'POD' 조건으로 Pod 가 아닌 id 는 무시된다 -->
+    <update id="updatePodStatus">
+      UPDATE resource
+         SET status = #{status},
+             phase = #{phase},
+             restarts = #{restarts},
+             cpu = #{cpu},
+             updated_at = #{now}
+       WHERE id = #{id}
+         AND type = 'POD'
+    </update>
 </mapper>
